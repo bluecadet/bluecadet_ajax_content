@@ -1,0 +1,14 @@
+name: Bluecadet Custom Ajax Content Example
+type: module
+description: Example for custom Ajaxing of content.
+core_version_requirement: ^10
+
+package: Content
+
+dependencies:
+  - bluecadet_ajax_content:bluecadet_ajax_content
+
+configure: null
+
+project: bluecadet_ajax_content
+version: 1.0.0

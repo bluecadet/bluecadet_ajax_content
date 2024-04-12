@@ -1,0 +1,4 @@
+content-ajaxing:
+  version: 1.x
+  js:
+    assets/dist/js/content-ajaxing.js: { weight: -9 }

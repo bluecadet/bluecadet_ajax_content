@@ -1,0 +1,13 @@
+name: Custom Ajax Content
+type: module
+description: Library to handle AJAXing content utilitizing Drupal's AJAX. This module in and of itself will do nothing. You will need to add custom modules and Controllers to usitlize this functionality.
+core_version_requirement: ^10
+
+package: Bluecadet
+
+dependencies: []
+
+configure: null
+
+project: bluecadet_ajax_content
+version: 1.0.0

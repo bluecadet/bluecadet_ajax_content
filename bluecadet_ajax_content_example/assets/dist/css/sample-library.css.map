@@ -1,0 +1,1 @@
+{"version":3,"sources":["web/modules/custom/custom_ajax_content/custom_ajax_content_example/assets/src/css/sample-library.css"],"names":[],"mappings":";;AAEA;EACE,oBAAqB;AACvB","file":"sample-library.css","sourcesContent":["\n\n.sample-example {\n  background-color: red;\n}\n"]}

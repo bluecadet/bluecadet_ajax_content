@@ -1,0 +1,7 @@
+sample:
+  version: 1.x
+  css:
+    theme:
+      assets/dist/css/sample-library.css: {}
+  js:
+    assets/dist/js/sample-library.js: {}
