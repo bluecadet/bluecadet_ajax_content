@@ -1,0 +1,21 @@
+{
+  "name": "bluecadet/bluecadet_ajax_content",
+  "description": "Library to handle AJAXing content utilitizing Drupal's AJAX.",
+  "type": "custom-drupal-module",
+  "authors": [
+    {
+      "name": "Pete Inge",
+      "email": "pete.inge@gmail.com",
+      "role": "Maintainer"
+    }
+  ],
+  "license": "GPL-2.0+",
+  "minimum-stability": "dev",
+  "require": {
+    "php": "^7.4||^8.0",
+    "bluecadet/bc_drupal_package_manager": "^1.0",
+    "composer/installers": "^1.9||^2.0",
+    "drupal/core": "^10",
+    "oomphinc/composer-installers-extender": "^2.0"
+  }
+}
