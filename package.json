@@ -1,0 +1,30 @@
+{
+  "name": "bluecadet_ajax_content",
+  "version": "4.0.3",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\"",
+    "build": "npx bldr build",
+    "clean": "rm -rfv ./assets/dist/* && rm -rfv ./modules/**/assets/dist/*",
+    "watch": "npx bldr watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bluecadet/bluecadet_ajax_content.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bluecadet/bluecadet_ajax_content/issues"
+  },
+  "homepage": "https://github.com/bluecadet/bluecadet_ajax_content#readme",
+  "dependencies": {
+    "@bluecadet/bldr": "^1.0.7",
+    "@bluecadet/drops": "^1.0.0-alpha.3"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "postcss-pxtorem": "^6.1.0"
+  }
+}
