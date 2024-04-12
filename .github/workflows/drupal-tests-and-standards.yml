@@ -76,7 +76,7 @@ jobs:
         working-directory: ${{ env.DRUPAL_ROOT }}
         run: |
           composer config --no-plugins allow-plugins.oomphinc/composer-installers-extender true
-          composer config repositories.0 path $GITHUB_WORKSPACE
+          composer config repositories.$DRUPAL_MODULE_NAME '{"type": "path", "url": "$GITHUB_WORKSPACE", "options": {"symlink": true}}'
           composer config extra.installer-paths
           composer config --json extra.installer-types '["custom-drupal-module"]'
           composer config --json --merge extra.installer-paths '{"modules/bluecadet/{$name}": ["type:custom-drupal-module"]}'
@@ -160,6 +160,12 @@ jobs:
       #       --php /usr/local/bin/php --color --verbose \
       #       --sqlite /tmp/test.sqlite \
       #       --url $SIMPLETEST_BASE_URL $DRUPAL_MODULE_NAME
+
+      - name: Debug 1
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        continue-on-error: true
+        run: |
+          ls -sla $MODULE_FOLDER
 
       # Uncomment this step to run tests using phpunit. Your module is expected
       # to ship with 'phpunit.xml' file. See the repository for an example
