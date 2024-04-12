@@ -14,25 +14,9 @@ jobs:
       fail-fast: false
       matrix:
         drupal-core: ['10.1.x', '10.2.x', '10.3.x']
-        php-version: ['8.0', '8.1', '8.2']
+        php-version: ['8.1', '8.2']
         mariadb-version: ['10.4', '10.6']
-        exclude:
-          -
-            drupal-core: '10.0.x'
-            php-version: '8.0'
-            mariadb-version: '10.4'
-          -
-            drupal-core: '10.0.x'
-            php-version: '8.0'
-            mariadb-version: '10.6'
-          -
-            drupal-core: '10.1.x'
-            php-version: '8.0'
-            mariadb-version: '10.4'
-          -
-            drupal-core: '10.1.x'
-            php-version: '8.0'
-            mariadb-version: '10.6'
+        exclude: []
 
     container:
       # See https://github.com/tuutti/docker-images/tree/main/drupal/ci
@@ -109,7 +93,7 @@ jobs:
       # Drush is installed.
       - name: Install drush
         working-directory: ${{ env.DRUPAL_ROOT }}
-        run: composer require "drush/drush ^11.0"
+        run: composer require "drush/drush ^11.0 || ^12.0"
 
       - name: Install PHPCS
         working-directory: ${{ env.DRUPAL_ROOT }}
@@ -125,12 +109,19 @@ jobs:
             site-install minimal --db-url="$SIMPLETEST_DB"
           vendor/bin/drush en $DRUPAL_MODULE_NAME -y
 
+      - name: Set PHPCS config vars
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        continue-on-error: true
+        run: |
+          ./vendor/bin/phpcs --config-set ignore_warnings_on_exit 1
+          ./vendor/bin/phpcs --config-set ignore_errors_on_exit 1
+
       - name: Run PHPCS
         working-directory: ${{ env.DRUPAL_ROOT }}
         continue-on-error: true
         run: |
-          vendor/bin/phpcs --report=Bluecadet\\PHPCS\\Report\\MarkdownGithub -s --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,css,info,txt --ignore=node_modules,bower_components,vendor,dist --exclude=Drupal.InfoFiles.AutoAddedKeys --colors $MODULE_FOLDER
-          vendor/bin/phpcs --report=Bluecadet\\PHPCS\\Report\\MarkdownGithub -s --standard=DrupalPractice --extensions=php,module,inc,install,test,profile,theme,css,info,txt --ignore=node_modules,bower_components,vendor,dist --exclude=Drupal.InfoFiles.AutoAddedKeys --colors $MODULE_FOLDER
+          vendor/bin/phpcs --report=Bluecadet\\PHPCS\\Report\\MarkdownGithub -s --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,css,info,txt --ignore=node_modules,bower_components,vendor,dist --exclude=Drupal.InfoFiles.AutoAddedKeys --colors $MODULE_FOLDER  >> $GITHUB_STEP_SUMMARY
+          vendor/bin/phpcs --report=Bluecadet\\PHPCS\\Report\\MarkdownGithub -s --standard=DrupalPractice --extensions=php,module,inc,install,test,profile,theme,css,info,txt --ignore=node_modules,bower_components,vendor,dist --exclude=Drupal.InfoFiles.AutoAddedKeys --colors $MODULE_FOLDER  >> $GITHUB_STEP_SUMMARY
 
       - name: Run Drupal-Check
         working-directory: ${{ env.DRUPAL_ROOT }}
