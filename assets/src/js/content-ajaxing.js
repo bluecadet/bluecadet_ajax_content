@@ -32,27 +32,7 @@
         }
 
         if (elem.dataset.ajaxCommands) {
-          // fetch(elem.dataset.ajaxCommands)
-          //   .then((response) => {
-          //     // console.log(response, response.text(), response.status, response.statusText);
-          //     return response.text();
-          //   })
-          //   .then((text) => {
-
-          //     console.log(text);
-
-              // elem.innerHTML = text;
-              // elem.classList.add("loaded");
-
-              // Drupal.attachBehaviors(elem);
-
-              // if (elem.dataset.ajaxEvent) {
-              //   const timelineDataEvent = new Event(elem.dataset.ajaxEvent);
-              //   window.dispatchEvent(timelineDataEvent);
-              // }
-          // });
-
-          Drupal.ajax({url: elem.dataset.ajaxCommands, httpMethod: 'GET'}).execute();
+          Drupal.ajax({ url: elem.dataset.ajaxCommands, httpMethod: 'GET' }).execute();
         }
 
         contentObserver.unobserve(elem);
@@ -81,15 +61,25 @@
       // Load Ajaxable content.
       const ajaxElsNow = document.querySelectorAll("[data-ajax-now]");
 
+      // Data obj here so we don't make multiple calls if we don't need to.
+      let data = {};
       ajaxElsNow.forEach(element => {
-        fetch(element.dataset.ajaxNow)
+        if (!data[element.dataset.ajaxNow]) {
+          data[element.dataset.ajaxNow] = [];
+        }
+        data[element.dataset.ajaxNow].push(element);
+      });
+      for (const [url, elements] of Object.entries(data)) {
+        fetch(url)
           .then((response) => response.text())
           .then((text) => {
-            element.innerHTML = text;
-            element.removeAttribute("data-ajax-now");
-            element.classList.add("ajax-now--loaded");
+            elements.forEach(element => {
+              element.innerHTML = text;
+              element.removeAttribute("data-ajax-now");
+              element.classList.add("ajax-now--loaded");
+            });
           });
-      });
+      };
     },
   };
 
