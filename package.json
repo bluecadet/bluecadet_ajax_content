@@ -1,6 +1,6 @@
 {
   "name": "bluecadet_ajax_content",
-  "version": "4.0.3",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,7 @@
   "homepage": "https://github.com/bluecadet/bluecadet_ajax_content#readme",
   "dependencies": {
     "@bluecadet/bldr": "^1.0.7",
-    "@bluecadet/drops": "^1.0.0-alpha.3"
+    "@bluecadet/drops": "^1.0.0"
   },
   "devDependencies": {
     "concurrently": "^7.6.0",

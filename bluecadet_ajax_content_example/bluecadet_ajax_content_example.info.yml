@@ -12,3 +12,9 @@ configure: null
 
 project: bluecadet_ajax_content
 version: 1.0.0
+
+
+# Information added by packaging script on 2024-04-22
+version: 1.0.1
+project: bluecadet_ajax_content
+datestamp: 1713803921101
