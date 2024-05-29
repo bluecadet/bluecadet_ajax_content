@@ -5,3 +5,6 @@ sample:
       assets/dist/css/sample-library.css: {}
   js:
     assets/dist/js/sample-library.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
