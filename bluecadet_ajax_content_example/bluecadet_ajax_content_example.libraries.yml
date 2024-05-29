@@ -1,10 +1,11 @@
-sample:
+simple:
   version: 1.x
   css:
     theme:
-      assets/dist/css/sample-library.css: {}
+      assets/dist/css/simple-library.css: {}
   js:
-    assets/dist/js/sample-library.js: {}
+    assets/dist/js/simple-library.js: {}
   dependencies:
     - core/drupal
     - core/jquery
+
