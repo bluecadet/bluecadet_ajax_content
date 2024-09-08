@@ -7,7 +7,8 @@ use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\system\Entity\Action;
 
 class AjaxContentTest extends WebDriverTestBase {
-    /**
+
+  /**
    * {@inheritdoc}
    */
   protected static $modules = ['bluecadet_ajax_content', 'bluecadet_ajax_content_example'];
