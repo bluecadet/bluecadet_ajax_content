@@ -58,6 +58,15 @@
         el.classList.add("observing");
       });
 
+      // Ajax Commands.
+      const ajaxElsTrigger = context.querySelectorAll("[data-ajax-trigger]:not(.observing)");
+      ajaxElsTrigger.forEach(el => {
+        el.classList.add("observing");
+        el.addEventListener('trigger-ajax', e => {
+          Drupal.ajax({ url: el.dataset.ajaxTrigger, httpMethod: 'GET' }).execute();
+        });
+      });
+
       // Load Ajaxable content.
       const ajaxElsNow = document.querySelectorAll("[data-ajax-now]");
 

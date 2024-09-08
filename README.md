@@ -1,8 +1,8 @@
+# Custom Ajax Content
+
 ## Versions
 
 ### 1.x Branch
-
-Completely old and outdated... do not use.
 
 ## Includes
 
@@ -10,15 +10,14 @@ Completely old and outdated... do not use.
 
 - bluecadet_ajax_content_example
 
-<hr>
-
 ## Not using Composer
+
 If you are not using composer, you can delete all unneeded files.
 
 - composer.json
 
-
 ## Using Composer
+
 If you are using composer to manage Drupal modules, make sure you add custom
 location for this module to be downloaded to. You must add the installer types
 line as well as the location for the module.
@@ -36,8 +35,10 @@ line as well as the location for the module.
   },
   ...
 ```
+
 ## Changelog
 
 ### 1.x
 
-- Initial commit allowing for 3 differnt types of Content AJAXing
+- Initial commit allowing for 3 different types of Content AJAXing
+- Adding in another "trigger" type for Content AJAXing
