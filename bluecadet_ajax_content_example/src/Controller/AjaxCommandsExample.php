@@ -5,7 +5,6 @@ namespace Drupal\bluecadet_ajax_content_example\Controller;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Render\RendererInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * An example controller.
  */
-class AjaxCommandsExample extends ControllerBase implements ContainerInjectionInterface {
+class AjaxCommandsExample extends ControllerBase {
 
   /**
    * The renderer service.
