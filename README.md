@@ -4,14 +4,14 @@ A Drupal module that provides a library for handling AJAX content loading utiliz
 
 ## Requirements
 
-- Drupal 10.3+ or Drupal 11.x
+- Drupal 10.5+ or Drupal 11.2+
 - PHP 8.2 or higher
 
 ## Versions
 
 ### 1.x Branch
 
-- **1.1.x**: Drupal 10.3+/11.x support (PHP 8.2+)
+- **1.1.x**: Drupal 10.5+/11.2+ support (PHP 8.2+)
 - **1.0.x**: Drupal 10.x support (PHP 7.4+)
 
 ## Includes
@@ -50,8 +50,8 @@ line as well as the location for the module.
 
 This module includes automated tests that run via GitHub Actions against:
 
-- Drupal 10.3.x and 10.4.x (PHP 8.2 and 8.3)
-- Drupal 11.0.x and 11.1.x (PHP 8.3)
+- Drupal 10.5.x and 10.6.x (PHP 8.2 and 8.3)
+- Drupal 11.2.x and 11.3.x (PHP 8.3)
 - MariaDB 10.6 and 11.4
 
 ### Test Plan

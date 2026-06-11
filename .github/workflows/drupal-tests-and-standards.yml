@@ -13,16 +13,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Test latest 2 D10 versions (10.3, 10.4) and all current D11 versions (11.0, 11.1)
-        drupal-core: ['10.3.x', '10.4.x', '11.0.x', '11.1.x']
+        # Test active Drupal versions: 10.5.x, 10.6.x, 11.2.x, 11.3.x
+        drupal-core: ['10.5.x', '10.6.x', '11.2.x', '11.3.x']
         php-version: ['8.3']
         mariadb-version: ['10.6', '11.4']
         include:
           # Test PHP 8.2 for D10 (D11 also supports PHP 8.2 but we test with 8.3)
-          - drupal-core: '10.3.x'
+          - drupal-core: '10.5.x'
             php-version: '8.2'
             mariadb-version: '10.6'
-          - drupal-core: '10.4.x'
+          - drupal-core: '10.6.x'
             php-version: '8.2'
             mariadb-version: '10.6'
         exclude: []

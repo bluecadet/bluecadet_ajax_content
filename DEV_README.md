@@ -52,12 +52,12 @@ vendor/bin/drupal-check modules/bluecadet/bluecadet_ajax_content
 
 | Module Version | Drupal Version | PHP Version |
 |----------------|----------------|-------------|
-| 1.1.x          | 10.3+, 11.x    | 8.2+        |
+| 1.1.x          | 10.5+, 11.2+   | 8.2+        |
 | 1.0.x          | 10.x           | 7.4+        |
 
 ## CI/CD
 
 GitHub Actions runs tests on:
-- Drupal 10.3.x, 10.4.x (PHP 8.2, 8.3)
-- Drupal 11.0.x, 11.1.x (PHP 8.3)
+- Drupal 10.5.x, 10.6.x (PHP 8.2, 8.3)
+- Drupal 11.2.x, 11.3.x (PHP 8.3)
 - MariaDB 10.6, 11.4
