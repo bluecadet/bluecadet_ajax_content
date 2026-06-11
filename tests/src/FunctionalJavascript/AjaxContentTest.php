@@ -1,11 +1,15 @@
 <?php
 
-namespace Drupal\bluecadet_ajax_content\FunctionalJavascript;
+namespace Drupal\Tests\bluecadet_ajax_content\FunctionalJavascript;
 
 use Drupal\Core\Url;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
-use Drupal\system\Entity\Action;
 
+/**
+ * Tests Ajax content loading functionality.
+ *
+ * @group bluecadet_ajax_content
+ */
 class AjaxContentTest extends WebDriverTestBase {
 
   /**
@@ -23,14 +27,12 @@ class AjaxContentTest extends WebDriverTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    // $user = $this->drupalCreateUser(['administer actions']);
-    // $this->drupalLogin($user);
   }
 
   /**
-   * Tests action plugins with AJAX save their configuration.
+   * Tests immediate Ajax content loading.
    */
-  public function testAjaxContentLoad() {
+  public function testAjaxContentLoad(): void {
     // Simple example.
     $url = Url::fromRoute('bluecadet_ajax_content_example.simple_example_immediate');
     $this->drupalGet($url);

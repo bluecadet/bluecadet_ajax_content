@@ -13,9 +13,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        drupal-core: ['10.1.x', '10.2.x', '10.3.x']
-        php-version: ['8.1', '8.2']
-        mariadb-version: ['10.4', '10.6']
+        # Test latest 2 D10 versions (10.3, 10.4) and all current D11 versions (11.0, 11.1)
+        drupal-core: ['10.3.x', '10.4.x', '11.0.x', '11.1.x']
+        php-version: ['8.3']
+        mariadb-version: ['10.6', '11.4']
+        include:
+          # Additional PHP 8.2 tests for D10 (minimum for D11 is 8.3)
+          - drupal-core: '10.3.x'
+            php-version: '8.2'
+            mariadb-version: '10.6'
+          - drupal-core: '10.4.x'
+            php-version: '8.2'
+            mariadb-version: '10.6'
         exclude: []
 
     container:
@@ -34,7 +43,7 @@ jobs:
           - 3306:3306
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
@@ -93,7 +102,7 @@ jobs:
       # Drush is installed.
       - name: Install drush
         working-directory: ${{ env.DRUPAL_ROOT }}
-        run: composer require "drush/drush ^11.0 || ^12.0"
+        run: composer require "drush/drush ^12.0 || ^13.0"
 
       - name: Install PHPCS
         working-directory: ${{ env.DRUPAL_ROOT }}
