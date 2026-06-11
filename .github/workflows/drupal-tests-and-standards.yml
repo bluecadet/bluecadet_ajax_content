@@ -18,7 +18,7 @@ jobs:
         php-version: ['8.3']
         mariadb-version: ['10.6', '11.4']
         include:
-          # Additional PHP 8.2 tests for D10 (minimum for D11 is 8.3)
+          # Test PHP 8.2 for D10 (D11 also supports PHP 8.2 but we test with 8.3)
           - drupal-core: '10.3.x'
             php-version: '8.2'
             mariadb-version: '10.6'
