@@ -1,5 +1,6 @@
 name: Tests
 on:
+  workflow_dispatch:
   push:
   pull_request:
     branches: [ 1.x ]
@@ -13,10 +14,35 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        drupal-core: ['10.1.x', '10.2.x', '10.3.x']
-        php-version: ['8.1', '8.2']
-        mariadb-version: ['10.4', '10.6']
-        exclude: []
+        drupal-core:
+          - '10.1.x'
+          - '10.2.x'
+          - '10.3.x'
+          - '10.4.x'
+          - '10.5.x'
+          - '10.6.x'
+          - '11.1.x'
+          - '11.2.x'
+          - '11.3.x'
+        php-version:
+          - '8.2'
+          - '8.3'
+        mariadb-version:
+          - '10.4'
+          - '10.6'
+        exclude:
+          - drupal-core: '11.1.x'
+            php-version: '8.2'
+          - drupal-core: '11.1.x'
+            mariadb-version: '10.4'
+          - drupal-core: '11.2.x'
+            php-version: '8.2'
+          - drupal-core: '11.2.x'
+            mariadb-version: '10.4'
+          - drupal-core: '11.3.x'
+            php-version: '8.2'
+          - drupal-core: '11.3.x'
+            mariadb-version: '10.4'
 
     container:
       # See https://github.com/tuutti/docker-images/tree/main/drupal/ci
@@ -34,7 +60,7 @@ jobs:
           - 3306:3306
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
@@ -60,7 +86,7 @@ jobs:
       - name: Clone drupal
         run: |
           git clone --depth 1 --branch "${{ matrix.drupal-core }}" \
-            http://git.drupal.org/project/drupal.git/ $DRUPAL_ROOT
+            https://git.drupalcode.org/project/drupal.git/ $DRUPAL_ROOT
 
       # Override the platform.php config with currently active PHP version.
       # As of writing this, the composer.json shipped with core sets
@@ -80,8 +106,8 @@ jobs:
           composer config extra.installer-paths
           composer config --json extra.installer-types '["custom-drupal-module"]'
           composer config --json --merge extra.installer-paths '{"modules/bluecadet/{$name}": ["type:custom-drupal-module"]}'
-          composer require mglaman/drupal-check --dev
-          composer require bluecadet/$DRUPAL_MODULE_NAME
+          composer require --dev mglaman/drupal-check:^1.5 -W
+          composer require bluecadet/$DRUPAL_MODULE_NAME -W
 
       # PHP 8+ requires newer phpunit, use core's composer script
       # to upgrade it.
@@ -93,7 +119,7 @@ jobs:
       # Drush is installed.
       - name: Install drush
         working-directory: ${{ env.DRUPAL_ROOT }}
-        run: composer require "drush/drush ^11.0 || ^12.0"
+        run: composer require "drush/drush ^11.0 || ^12.0 || ^13"
 
       - name: Install PHPCS
         working-directory: ${{ env.DRUPAL_ROOT }}
@@ -172,6 +198,5 @@ jobs:
       # phpunit.xml file.
       - name: Run tests
         working-directory: ${{ env.DRUPAL_ROOT }}
-        continue-on-error: true
         run: |
           vendor/bin/phpunit --bootstrap $DRUPAL_ROOT/core/tests/bootstrap.php -c $MODULE_FOLDER/phpunit.xml $MODULE_FOLDER
