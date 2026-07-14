@@ -37,7 +37,7 @@ jobs:
         ports:
           - 3306:3306
       selenium:
-        image: selenium/standalone-chrome
+        image: selenium/standalone-chrome:3.141.59
         options: --shm-size=2g
 
     steps:
@@ -180,14 +180,14 @@ jobs:
 
           # Wait for Selenium service to become ready before PHPUnit starts.
           for i in {1..15}; do
-            if curl -sS "http://selenium:4444/status" > /tmp/selenium-status.json; then
+            if curl -sS "http://selenium:4444/wd/hub/status" > /tmp/selenium-status.json; then
               echo "Debug: Selenium status payload"
               cat /tmp/selenium-status.json
               break
             fi
             if [ "$i" -eq 15 ]; then
               echo "Selenium failed to become ready at selenium:4444"
-              curl -sS "http://selenium:4444/status" || true
+              curl -sS "http://selenium:4444/wd/hub/status" || true
               curl -sS "http://selenium:4444/wd/hub/status" || true
               exit 1
             fi
@@ -204,6 +204,6 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.DRUPAL_ROOT }}
         env:
-          MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome","goog:chromeOptions":{"args":["--headless=new","--disable-gpu","--no-sandbox","--disable-dev-shm-usage"]}}, "http://selenium:4444"]'
+          MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome","chromeOptions":{"w3c": false, "args":["--disable-gpu","--headless", "--no-sandbox"]}}, "http://selenium:4444/wd/hub"]'
         run: |
           vendor/bin/phpunit --bootstrap $DRUPAL_ROOT/core/tests/bootstrap.php $MODULE_FOLDER/tests/src
