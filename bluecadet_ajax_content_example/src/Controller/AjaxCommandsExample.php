@@ -2,19 +2,12 @@
 
 namespace Drupal\bluecadet_ajax_content_example\Controller;
 
-use Drupal\Core\Cache\CacheableMetadata;
-use Drupal\Core\Cache\CacheableResponse;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Render\RendererInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-
-
-
-use Drupal\Core\Ajax\PrependCommand;
-use Drupal\Core\Ajax\ReplaceCommand;
-use Drupal\Core\Ajax\AjaxResponse;
 
 
 
@@ -22,6 +15,32 @@ use Drupal\Core\Ajax\AjaxResponse;
  * An example controller.
  */
 class AjaxCommandsExample extends ControllerBase {
+
+  /**
+   * The renderer service.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
+   * Constructs an AjaxCommandsExample controller.
+   *
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer service.
+   */
+  public function __construct(RendererInterface $renderer) {
+    $this->renderer = $renderer;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('renderer')
+    );
+  }
 
   public function build(Request $request) {
 
@@ -56,9 +75,7 @@ class AjaxCommandsExample extends ControllerBase {
       ],
     ];
 
-    $response = new CacheableResponse('', 200);
-    $renderer = \Drupal::service('renderer');
-    $output = (string) $renderer->renderRoot($build);
+    $output = (string) $this->renderer->renderRoot($build);
 
     $response = new AjaxResponse();
     $response->addCommand(new ReplaceCommand("#to-be-replaced-1", $output));
