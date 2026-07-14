@@ -5,6 +5,7 @@ namespace Drupal\bluecadet_ajax_content_example\Controller;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Link;
 use Drupal\Core\Render\RendererInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -46,6 +47,14 @@ class SimpleExample extends ControllerBase {
   public function build(Request $request) {
 
     return [
+      'example-nav' => [
+        '#theme' => 'item_list',
+        '#items' => [
+          Link::createFromRoute($this->t('Simple Example'), 'bluecadet_ajax_content_example.simple_example_immediate'),
+          Link::createFromRoute($this->t('Scroll Example'), 'bluecadet_ajax_content_example.simple_example_scroll'),
+          Link::createFromRoute($this->t('Ajax Commands Example'), 'bluecadet_ajax_content_example.ajax_commands_example_scroll'),
+        ],
+      ],
       'center-content' => [
         '#markup' => '<div>this is crazy.</div><div data-ajax-now="/ajax-api/simple-example">...This will get replaced...</div><div>This is after the ajaxed content.</div>',
         '#attached' => [
