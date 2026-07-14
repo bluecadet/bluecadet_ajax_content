@@ -69,7 +69,7 @@ jobs:
       - name: Clone drupal
         run: |
           git clone --depth 1 --branch "${{ matrix.drupal-core }}" \
-            http://git.drupal.org/project/drupal.git/ $DRUPAL_ROOT
+            https://git.drupalcode.org/project/drupal.git/ $DRUPAL_ROOT
 
       # Override the platform.php config with currently active PHP version.
       # As of writing this, the composer.json shipped with core sets
@@ -89,8 +89,8 @@ jobs:
           composer config extra.installer-paths
           composer config --json extra.installer-types '["custom-drupal-module"]'
           composer config --json --merge extra.installer-paths '{"modules/bluecadet/{$name}": ["type:custom-drupal-module"]}'
-          composer require mglaman/drupal-check --dev
-          composer require bluecadet/$DRUPAL_MODULE_NAME
+          composer require --dev mglaman/drupal-check:^1.5 -W
+          composer require bluecadet/$DRUPAL_MODULE_NAME -W
 
       # PHP 8+ requires newer phpunit, use core's composer script
       # to upgrade it.
@@ -102,7 +102,7 @@ jobs:
       # Drush is installed.
       - name: Install drush
         working-directory: ${{ env.DRUPAL_ROOT }}
-        run: composer require "drush/drush ^12.0 || ^13.0"
+        run: composer require "drush/drush:^12.4.3" -W
 
       - name: Install PHPCS
         working-directory: ${{ env.DRUPAL_ROOT }}
