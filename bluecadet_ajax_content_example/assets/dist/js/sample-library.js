@@ -1,1 +1,0 @@
-!function(){const s={NODE_ENV:"production"};try{if(process)return process.env=Object.assign({},process.env),void Object.assign(process.env,s)}catch(s){}globalThis.process={env:s}}();
