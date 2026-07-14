@@ -39,8 +39,8 @@ class AjaxContentTest extends WebDriverTestBase {
 
     $session_assert = $this->assertSession();
 
-    $session_assert->assertWaitOnAjaxRequest();
     $session_assert->waitForElementVisible('css', '.ajax-now--loaded');
+    $session_assert->waitForElementVisible('css', '.ajax-now--loaded p');
 
     $session_assert->pageTextContains('Ajaxed Paragraph 1.');
     $session_assert->pageTextContains('Ajaxed Paragraph 2.');
