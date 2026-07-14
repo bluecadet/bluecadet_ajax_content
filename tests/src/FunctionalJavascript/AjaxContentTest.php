@@ -44,10 +44,12 @@ class AjaxContentTest extends WebDriverTestBase {
     $url = Url::fromRoute('bluecadet_ajax_content_example.simple_example_scroll');
     $this->drupalGet($url);
 
-    // Bring the observed element into view so IntersectionObserver can fire.
-    $this->getSession()->executeScript('window.scrollTo(0, document.body.scrollHeight);');
-
     $session_assert = $this->assertSession();
+    $session_assert->waitForElementVisible('css', '[data-ajax-scroll]');
+
+    // Bring the observed element into view so IntersectionObserver can fire.
+    $this->scrollElementIntoView('[data-ajax-scroll]');
+
     $session_assert->waitForElementVisible('css', '[data-ajax-scroll].loaded p');
 
     $this->assertAjaxParagraphsPresent();
@@ -60,13 +62,23 @@ class AjaxContentTest extends WebDriverTestBase {
     $url = Url::fromRoute('bluecadet_ajax_content_example.ajax_commands_example_scroll');
     $this->drupalGet($url);
 
-    // Bring the observed element into view so IntersectionObserver can fire.
-    $this->getSession()->executeScript('window.scrollTo(0, document.body.scrollHeight);');
-
     $session_assert = $this->assertSession();
+    $session_assert->waitForElementVisible('css', '#to-be-replaced-1');
+
+    // Bring the observed element into view so IntersectionObserver can fire.
+    $this->scrollElementIntoView('#to-be-replaced-1');
+
     $session_assert->waitForElementVisible('css', '#to-be-replaced-1 p');
 
     $this->assertAjaxParagraphsPresent();
+  }
+
+  /**
+   * Scrolls a CSS selector into the viewport to trigger observer-based loading.
+   */
+  protected function scrollElementIntoView(string $selector): void {
+    $selector = addslashes($selector);
+    $this->getSession()->executeScript("const el = document.querySelector(\"$selector\"); if (el) { el.scrollIntoView({block: 'center'}); }");
   }
 
   /**
