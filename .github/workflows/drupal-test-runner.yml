@@ -20,6 +20,8 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     container:
       # See https://github.com/tuutti/docker-images/tree/main/drupal/ci
       # to see how this image is built.

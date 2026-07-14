@@ -10,6 +10,8 @@ on:
 jobs:
   test-pr:
     if: ${{ github.event_name == 'pull_request' }}
+    permissions:
+      contents: read
     name: PR matrix | D${{ matrix.drupal_core }} | PHP${{ matrix.php_version }} | MariaDB${{ matrix.mariadb_version }}
     strategy:
       fail-fast: false
@@ -33,6 +35,8 @@ jobs:
 
   test-full:
     if: ${{ github.event_name != 'pull_request' }}
+    permissions:
+      contents: read
     name: Full matrix | D${{ matrix.drupal_core }} | PHP${{ matrix.php_version }} | MariaDB${{ matrix.mariadb_version }}
     strategy:
       fail-fast: false

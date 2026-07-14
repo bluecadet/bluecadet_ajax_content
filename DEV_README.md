@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Node.js 16+ (see `.nvmrc`)
+- Node.js 20+ (see `.nvmrc`)
 - PHP 8.2+
 - Composer
 
