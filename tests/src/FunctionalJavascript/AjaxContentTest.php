@@ -23,17 +23,9 @@ class AjaxContentTest extends WebDriverTestBase {
   protected $defaultTheme = 'stark';
 
   /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
-    parent::setUp();
-  }
-
-  /**
    * Tests immediate Ajax content loading.
    */
-  public function testAjaxContentLoad(): void {
-    // Simple example.
+  public function testAjaxContentLoadImmediate(): void {
     $url = Url::fromRoute('bluecadet_ajax_content_example.simple_example_immediate');
     $this->drupalGet($url);
 
@@ -42,51 +34,50 @@ class AjaxContentTest extends WebDriverTestBase {
     $session_assert->waitForElementVisible('css', '.ajax-now--loaded');
     $session_assert->waitForElementVisible('css', '.ajax-now--loaded p');
 
+    $this->assertAjaxParagraphsPresent();
+  }
+
+  /**
+   * Tests scroll-triggered Ajax content loading.
+   */
+  public function testAjaxContentLoadOnScroll(): void {
+    $url = Url::fromRoute('bluecadet_ajax_content_example.simple_example_scroll');
+    $this->drupalGet($url);
+
+    // Bring the observed element into view so IntersectionObserver can fire.
+    $this->getSession()->executeScript('window.scrollTo(0, document.body.scrollHeight);');
+
+    $session_assert = $this->assertSession();
+    $session_assert->waitForElementVisible('css', '[data-ajax-scroll].loaded p');
+
+    $this->assertAjaxParagraphsPresent();
+  }
+
+  /**
+   * Tests Ajax commands content replacement.
+   */
+  public function testAjaxCommandsLoad(): void {
+    $url = Url::fromRoute('bluecadet_ajax_content_example.ajax_commands_example_scroll');
+    $this->drupalGet($url);
+
+    // Bring the observed element into view so IntersectionObserver can fire.
+    $this->getSession()->executeScript('window.scrollTo(0, document.body.scrollHeight);');
+
+    $session_assert = $this->assertSession();
+    $session_assert->waitForElementVisible('css', '#to-be-replaced-1 p');
+
+    $this->assertAjaxParagraphsPresent();
+  }
+
+  /**
+   * Asserts the expected paragraphs are present on the page.
+   */
+  protected function assertAjaxParagraphsPresent(): void {
+    $session_assert = $this->assertSession();
+
     $session_assert->pageTextContains('Ajaxed Paragraph 1.');
     $session_assert->pageTextContains('Ajaxed Paragraph 2.');
     $session_assert->pageTextContains('Ajaxed Paragraph 3.');
-
-
-    // Scroll example.
-    // $url = Url::fromRoute('bluecadet_ajax_content_example.simple_example_scroll');
-    // $this->drupalGet($url);
-    // // $this->assertSession()->assertWaitOnAjaxRequest();
-    // $page = $this->getSession()->getPage();
-
-    // $this->assertSession()->waitForElementVisible('css', 'div[data-ajax-scroll=*]');
-
-    // $this->assertSession()->pageTextContains('Ajaxed Paragraph 1.');
-    // $this->assertSession()->pageTextContains('Ajaxed Paragraph 2.');
-    // $this->assertSession()->pageTextContains('Ajaxed Paragraph 3.');
-
-
-    // $id = 'test_plugin';
-    // $this->assertSession()->waitForElementVisible('named', ['button', 'Edit'])->press();
-    // $this->assertSession()->waitForElementVisible('css', '[name="id"]')->setValue($id);
-
-    // $page->find('css', '[name="having_a_party"]')
-    //   ->check();
-    // $this->assertSession()->waitForElementVisible('css', '[name="party_time"]');
-
-    // $party_time = 'Evening';
-    // $page->find('css', '[name="party_time"]')
-    //   ->setValue($party_time);
-
-    // $page->find('css', '[value="Save"]')
-    //   ->click();
-
-    // $url = Url::fromRoute('entity.action.collection');
-    // $this->assertSession()->pageTextContains('The action has been successfully saved.');
-    // $this->assertSession()->addressEquals($url);
-
-    // // Check storage.
-    // $instance = Action::load($id);
-    // $configuration = $instance->getPlugin()->getConfiguration();
-    // $this->assertEquals(['party_time' => $party_time], $configuration);
-
-    // // Configuration should be shown in edit form.
-    // $this->drupalGet($instance->toUrl('edit-form'));
-    // $this->assertSession()->checkboxChecked('having_a_party');
-    // $this->assertSession()->fieldValueEquals('party_time', $party_time);
   }
+
 }
