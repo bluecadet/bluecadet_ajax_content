@@ -172,51 +172,34 @@ jobs:
       - name: Start Drush webserver and wait for Selenium
         working-directory: ${{ env.DRUPAL_ROOT }}
         run: |
-          echo "Debug: DRUPAL_ROOT=$DRUPAL_ROOT"
-          echo "Debug: JOB_CONTAINER_IP=$JOB_CONTAINER_IP"
-          echo "Debug: SIMPLETEST_BASE_URL=$SIMPLETEST_BASE_URL"
-          echo "Debug: DRUSH_RUNSERVER_URL=$DRUSH_RUNSERVER_URL"
-          echo "Debug: DRUSH_PROBE_URL=$DRUSH_PROBE_URL"
-          echo "Debug: selenium endpoint=http://selenium:4444"
-
-          vendor/bin/drush runserver $DRUSH_RUNSERVER_URL > /dev/null 2>&1 &
-
-          echo "Debug: DNS resolution for selenium"
-          getent hosts selenium || true
+          vendor/bin/drush runserver $DRUSH_RUNSERVER_URL > /tmp/drush-runserver.log 2>&1 &
 
           # Wait for drush server to start.
-          for i in {1..5}; do \
+          for i in {1..15}; do \
             RESPONSE_CODE=$(curl -s -o /dev/null \
               -w "%{http_code}" "$DRUSH_PROBE_URL" || true); \
             if [ "$RESPONSE_CODE" -gt "301" ] || [ "$RESPONSE_CODE" -lt "200" ]; then
+              if [ "$i" -eq 15 ]; then
+                echo "Drush webserver failed to become ready at $DRUSH_PROBE_URL"
+                cat /tmp/drush-runserver.log || true
+                exit 1
+              fi
               sleep 2
             fi
           done
 
-          echo "Debug: Drush HTTP probe"
-          curl -sS -I "$DRUSH_PROBE_URL" || true
-
           # Wait for Selenium service to become ready before PHPUnit starts.
           for i in {1..15}; do
             if curl -sS "http://selenium:4444/wd/hub/status" > /tmp/selenium-status.json; then
-              echo "Debug: Selenium status payload"
-              cat /tmp/selenium-status.json
               break
             fi
             if [ "$i" -eq 15 ]; then
               echo "Selenium failed to become ready at selenium:4444"
               curl -sS "http://selenium:4444/wd/hub/status" || true
-              curl -sS "http://selenium:4444/wd/hub/status" || true
               exit 1
             fi
             sleep 1
           done
-
-      - name: Debug module folder
-        working-directory: ${{ env.DRUPAL_ROOT }}
-        continue-on-error: true
-        run: |
-          ls -sla $MODULE_FOLDER
 
       # PHPUnit is blocking by design.
       - name: Run tests
