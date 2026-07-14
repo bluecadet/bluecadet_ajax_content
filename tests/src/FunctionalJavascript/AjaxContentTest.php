@@ -69,8 +69,9 @@ class AjaxContentTest extends WebDriverTestBase {
     $this->scrollElementIntoView('#to-be-replaced-1');
 
     $session_assert->waitForElementVisible('css', '#to-be-replaced-1 p');
-
-    $this->assertAjaxParagraphsPresent();
+    $session_assert->elementTextContains('css', '#to-be-replaced-1', 'Ajaxed Paragraph 1.');
+    $session_assert->elementTextContains('css', '#to-be-replaced-1', 'Ajaxed Paragraph 2.');
+    $session_assert->elementTextContains('css', '#to-be-replaced-1', 'Ajaxed Paragraph 3.');
   }
 
   /**

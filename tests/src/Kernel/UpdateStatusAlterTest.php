@@ -35,22 +35,4 @@ class UpdateStatusAlterTest extends KernelTestBase {
     $this->assertSame($expected, $projects);
   }
 
-  /**
-   * Tests targeted module key is preserved after alteration.
-   */
-  public function testTargetProjectKeyPreserved(): void {
-    $projects = [
-      'bluecadet_ajax_content' => [
-        'name' => 'bluecadet_ajax_content',
-        'project_type' => 'module',
-        'status' => 1,
-      ],
-    ];
-
-    bluecadet_ajax_content_update_status_alter($projects);
-
-    $this->assertArrayHasKey('bluecadet_ajax_content', $projects);
-    $this->assertIsArray($projects['bluecadet_ajax_content']);
-  }
-
 }

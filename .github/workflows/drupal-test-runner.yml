@@ -211,6 +211,7 @@ jobs:
           if php -m | grep -qiE 'xdebug|pcov'; then
             vendor/bin/phpunit \
               --bootstrap $DRUPAL_ROOT/core/tests/bootstrap.php \
+              --coverage-filter "$MODULE_FOLDER/src" \
               --coverage-clover "$GITHUB_WORKSPACE/coverage/clover.xml" \
               "$MODULE_FOLDER/${{ inputs.phpunit_target }}"
           else
