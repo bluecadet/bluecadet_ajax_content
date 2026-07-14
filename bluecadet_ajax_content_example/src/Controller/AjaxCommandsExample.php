@@ -9,8 +9,6 @@ use Drupal\Core\Render\RendererInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-
-
 /**
  * An example controller.
  */
@@ -42,6 +40,9 @@ class AjaxCommandsExample extends ControllerBase {
     );
   }
 
+  /**
+   * Builds the example page.
+   */
   public function build(Request $request) {
 
     return [
@@ -65,6 +66,9 @@ class AjaxCommandsExample extends ControllerBase {
     ];
   }
 
+  /**
+   * Returns the AJAX response used to replace the placeholder markup.
+   */
   public function ajaxResponse(Request $request) {
     $build = [
       '#markup' => '<p>Ajaxed Paragraph 1.</p><p class="simple-example">Ajaxed Paragraph 2.</p><p>Ajaxed Paragraph 3.</p>',

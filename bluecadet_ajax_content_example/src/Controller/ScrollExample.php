@@ -40,6 +40,9 @@ class ScrollExample extends ControllerBase {
     );
   }
 
+  /**
+   * Builds the example page.
+   */
   public function build(Request $request) {
 
     return [
@@ -63,6 +66,9 @@ class ScrollExample extends ControllerBase {
     ];
   }
 
+  /**
+   * Returns the AJAX response used to replace the placeholder markup.
+   */
   public function ajaxResponse(Request $request) {
     $build = [
       '#markup' => '<p>Ajaxed Paragraph 1.</p><p>Ajaxed Paragraph 2.</p><p>Ajaxed Paragraph 3.</p>',
