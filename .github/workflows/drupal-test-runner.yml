@@ -34,6 +34,9 @@ jobs:
           MYSQL_ROOT_PASSWORD: drupal
         ports:
           - 3306:3306
+      selenium:
+        image: selenium/standalone-chrome
+        options: --shm-size=2g
 
     steps:
       - uses: actions/checkout@v4
@@ -149,11 +152,10 @@ jobs:
             php vendor/bin/drupal-check $MODULE_FOLDER --drupal-root ${{ env.DRUPAL_ROOT }}
           fi
 
-      - name: Start Drush webserver and chromedriver
+      - name: Start Drush webserver and wait for Selenium
         working-directory: ${{ env.DRUPAL_ROOT }}
         run: |
           vendor/bin/drush runserver $SIMPLETEST_BASE_URL > /dev/null 2>&1 &
-          chromedriver --port=4444 --url-base=/wd/hub > /tmp/chromedriver.log 2>&1 &
           # Wait for drush server to start.
           for i in {1..5}; do \
             RESPONSE_CODE=$(curl -s -o /dev/null \
@@ -163,26 +165,17 @@ jobs:
             fi
           done
 
-          # Wait for chromedriver to start listening before PHPUnit starts.
+          # Wait for Selenium service to become ready before PHPUnit starts.
           for i in {1..15}; do
-            if curl -sS "http://127.0.0.1:4444/wd/hub/status" > /dev/null; then
+            if curl -sS "http://selenium:4444/wd/hub/status" > /dev/null; then
               break
             fi
             if [ "$i" -eq 15 ]; then
-              echo "Chromedriver failed to become ready on 127.0.0.1:4444"
-              cat /tmp/chromedriver.log || true
+              echo "Selenium failed to become ready at selenium:4444"
               exit 1
             fi
             sleep 1
           done
-
-      # Chromium browser is required to run functional javascript tests.
-      - name: Start chromium-browser
-        working-directory: ${{ env.DRUPAL_ROOT }}
-        run: |
-          chromium-browser --headless --disable-gpu \
-            --no-sandbox \
-            --remote-debugging-port=9222 &
 
       - name: Debug module folder
         working-directory: ${{ env.DRUPAL_ROOT }}
@@ -193,5 +186,7 @@ jobs:
       # PHPUnit is blocking by design.
       - name: Run tests
         working-directory: ${{ env.DRUPAL_ROOT }}
+        env:
+          MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome","goog:chromeOptions":{"args":["--headless=new","--disable-gpu","--no-sandbox","--disable-dev-shm-usage"]}}, "http://selenium:4444/wd/hub"]'
         run: |
-          vendor/bin/phpunit --bootstrap $DRUPAL_ROOT/core/tests/bootstrap.php -c $MODULE_FOLDER/phpunit.xml $MODULE_FOLDER
+          vendor/bin/phpunit --bootstrap $DRUPAL_ROOT/core/tests/bootstrap.php $MODULE_FOLDER/tests/src
