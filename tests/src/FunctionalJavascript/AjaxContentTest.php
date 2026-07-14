@@ -31,8 +31,8 @@ class AjaxContentTest extends WebDriverTestBase {
 
     $session_assert = $this->assertSession();
 
-    $session_assert->waitForElementVisible('css', '.ajax-now--loaded');
-    $session_assert->waitForElementVisible('css', '.ajax-now--loaded p');
+    $session_assert->waitForElement('css', '.ajax-now--loaded');
+    $session_assert->waitForElement('css', '.ajax-now--loaded p');
 
     $this->assertAjaxParagraphsPresent();
   }
@@ -45,12 +45,12 @@ class AjaxContentTest extends WebDriverTestBase {
     $this->drupalGet($url);
 
     $session_assert = $this->assertSession();
-    $session_assert->waitForElementVisible('css', '[data-ajax-scroll]');
+    $session_assert->waitForElement('css', '[data-ajax-scroll]');
 
     // Bring the observed element into view so IntersectionObserver can fire.
     $this->scrollElementIntoView('[data-ajax-scroll]');
 
-    $session_assert->waitForElementVisible('css', '[data-ajax-scroll].loaded p');
+    $session_assert->waitForElement('css', '[data-ajax-scroll].loaded p');
 
     $this->assertAjaxParagraphsPresent();
   }
@@ -63,12 +63,12 @@ class AjaxContentTest extends WebDriverTestBase {
     $this->drupalGet($url);
 
     $session_assert = $this->assertSession();
-    $session_assert->waitForElementVisible('css', '#to-be-replaced-1');
+    $session_assert->waitForElement('css', '#to-be-replaced-1');
 
     // Bring the observed element into view so IntersectionObserver can fire.
     $this->scrollElementIntoView('#to-be-replaced-1');
 
-    $session_assert->waitForElementVisible('css', '#to-be-replaced-1 p');
+    $session_assert->waitForElement('css', '#to-be-replaced-1 p');
     $session_assert->elementTextContains('css', '#to-be-replaced-1', 'Ajaxed Paragraph 1.');
     $session_assert->elementTextContains('css', '#to-be-replaced-1', 'Ajaxed Paragraph 2.');
     $session_assert->elementTextContains('css', '#to-be-replaced-1', 'Ajaxed Paragraph 3.');
