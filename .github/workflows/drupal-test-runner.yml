@@ -207,4 +207,23 @@ jobs:
         env:
           MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome","chromeOptions":{"w3c": false, "args":["--disable-gpu","--headless", "--no-sandbox"]}}, "http://selenium:4444/wd/hub"]'
         run: |
-          vendor/bin/phpunit --bootstrap $DRUPAL_ROOT/core/tests/bootstrap.php "$MODULE_FOLDER/${{ inputs.phpunit_target }}"
+          mkdir -p "$GITHUB_WORKSPACE/coverage"
+          if php -m | grep -qiE 'xdebug|pcov'; then
+            vendor/bin/phpunit \
+              --bootstrap $DRUPAL_ROOT/core/tests/bootstrap.php \
+              --coverage-clover "$GITHUB_WORKSPACE/coverage/clover.xml" \
+              "$MODULE_FOLDER/${{ inputs.phpunit_target }}"
+          else
+            echo "No code coverage driver (xdebug/pcov) available; running tests without coverage output."
+            vendor/bin/phpunit \
+              --bootstrap $DRUPAL_ROOT/core/tests/bootstrap.php \
+              "$MODULE_FOLDER/${{ inputs.phpunit_target }}"
+          fi
+
+      - name: Upload PHPUnit coverage artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: phpunit-coverage-${{ inputs.drupal_core }}-php${{ inputs.php_version }}
+          path: ${{ github.workspace }}/coverage/clover.xml
+          if-no-files-found: ignore
