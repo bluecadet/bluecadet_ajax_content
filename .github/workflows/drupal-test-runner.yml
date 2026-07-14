@@ -1,0 +1,179 @@
+name: Drupal Test Runner
+on:
+  workflow_call:
+    inputs:
+      drupal_core:
+        description: Drupal core branch to test
+        required: true
+        type: string
+      php_version:
+        description: PHP version for the test container
+        required: true
+        type: string
+      mariadb_version:
+        description: MariaDB version for service container
+        required: true
+        type: string
+env:
+  SIMPLETEST_DB: "mysql://drupal:drupal@mariadb:3306/drupal"
+  SIMPLETEST_BASE_URL: "http://127.0.0.1:8080"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      # See https://github.com/tuutti/docker-images/tree/main/drupal/ci
+      # to see how this image is built.
+      image: ghcr.io/tuutti/drupal-php-docker:${{ inputs.php_version }}
+    services:
+      mariadb:
+        image: mariadb:${{ inputs.mariadb_version }}
+        env:
+          MYSQL_USER: drupal
+          MYSQL_PASSWORD: drupal
+          MYSQL_DATABASE: drupal
+          MYSQL_ROOT_PASSWORD: drupal
+        ports:
+          - 3306:3306
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # The next three steps expose $DRUPAL_ROOT, $DRUPAL_MODULE_NAME,
+      # and $MODULE_FOLDER environment variables.
+      - name: Define DRUPAL_ROOT env variable
+        run: echo "DRUPAL_ROOT=$HOME/drupal" >> $GITHUB_ENV
+
+      - name: Define DRUPAL_MODULE_NAME env variable
+        run: echo "DRUPAL_MODULE_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+
+      # Change the module folder according to your needs, it's probably either
+      # modules/contrib/$DRUPAL_MODULE_NAME or modules/custom/$DRUPAL_MODULE_NAME.
+      - name: Set module folder
+        run: |
+          echo "MODULE_FOLDER=$DRUPAL_ROOT/modules/bluecadet/$DRUPAL_MODULE_NAME" \
+            >> $GITHUB_ENV
+
+      # Clone Drupal core into $DRUPAL_ROOT folder.
+      - name: Clone drupal
+        run: |
+          git clone --depth 1 --branch "${{ inputs.drupal_core }}" \
+            https://git.drupalcode.org/project/drupal.git/ $DRUPAL_ROOT
+
+      # Override the platform.php config with currently active PHP version.
+      - name: Override the platform.php version
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        run: composer config platform.php ${{ inputs.php_version }}
+
+      # Set the module folder as a composer repository so the latest code
+      # is symlinked from $GITHUB_WORKSPACE to modules/ folder.
+      - name: Install the module
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        run: |
+          composer config --no-plugins allow-plugins.oomphinc/composer-installers-extender true
+          composer config repositories.$DRUPAL_MODULE_NAME '{"type": "path", "url": "$GITHUB_WORKSPACE", "options": {"symlink": true}}'
+          composer config extra.installer-paths
+          composer config --json extra.installer-types '["custom-drupal-module"]'
+          composer config --json --merge extra.installer-paths '{"modules/bluecadet/{$name}": ["type:custom-drupal-module"]}'
+          case "${{ inputs.drupal_core }}" in
+            11.*)
+              echo "Skipping composer install of drupal-check for Drupal 11 due to PHPStan major-version conflicts."
+              ;;
+            *)
+              composer require --dev mglaman/drupal-check:^1.5 -W
+              ;;
+          esac
+          composer require bluecadet/$DRUPAL_MODULE_NAME -W
+
+      # Drupal 11 can conflict with drupal-check constraints in core's dependency graph.
+      # Install drupal-check in an isolated Composer project and run it from there.
+      - name: Install isolated Drupal-Check toolchain for Drupal 11
+        if: ${{ startsWith(inputs.drupal_core, '11.') }}
+        run: |
+          mkdir -p "$HOME/drupal-check-tools"
+          cd "$HOME/drupal-check-tools"
+          composer init --name bluecadet/drupal-check-tools --require mglaman/drupal-check:^1.5 --no-interaction
+          composer install --no-interaction --no-progress
+
+      # PHP 8+ requires newer phpunit, use core's composer script to upgrade it.
+      - name: Upgrade phpunit
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        run: composer run-script drupal-phpunit-upgrade
+
+      # We use drush's built-in webserver to run tests.
+      - name: Install drush
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        run: composer require "drush/drush:^12.4.3" -W
+
+      - name: Install PHPCS
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        run: |
+          composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+          composer require --dev "drupal/coder" "bluecadet/bc_composer_ci_tools:1.x-dev"
+
+      # Install Drupal using minimal installation profile and enable the module.
+      - name: Install Drupal
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        run: |
+          php -d sendmail_path=$(which true); vendor/bin/drush --yes -v \
+            site-install minimal --db-url="$SIMPLETEST_DB"
+          vendor/bin/drush en $DRUPAL_MODULE_NAME -y
+
+      - name: Set PHPCS config vars
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        continue-on-error: true
+        run: |
+          ./vendor/bin/phpcs --config-set ignore_warnings_on_exit 1
+          ./vendor/bin/phpcs --config-set ignore_errors_on_exit 1
+
+      - name: Run PHPCS
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        continue-on-error: true
+        run: |
+          vendor/bin/phpcs --report=Bluecadet\\PHPCS\\Report\\MarkdownGithub -s --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,css,info,txt --ignore=node_modules,bower_components,vendor,dist --exclude=Drupal.InfoFiles.AutoAddedKeys --colors $MODULE_FOLDER >> $GITHUB_STEP_SUMMARY
+          vendor/bin/phpcs --report=Bluecadet\\PHPCS\\Report\\MarkdownGithub -s --standard=DrupalPractice --extensions=php,module,inc,install,test,profile,theme,css,info,txt --ignore=node_modules,bower_components,vendor,dist --exclude=Drupal.InfoFiles.AutoAddedKeys --colors $MODULE_FOLDER >> $GITHUB_STEP_SUMMARY
+
+      - name: Run Drupal-Check
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        continue-on-error: true
+        run: |
+          if [[ "${{ inputs.drupal_core }}" == 11.* ]]; then
+            php "$HOME/drupal-check-tools/vendor/bin/drupal-check" $MODULE_FOLDER --drupal-root ${{ env.DRUPAL_ROOT }}
+          else
+            php vendor/bin/drupal-check $MODULE_FOLDER --drupal-root ${{ env.DRUPAL_ROOT }}
+          fi
+
+      - name: Start Drush webserver and chromedriver
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        run: |
+          vendor/bin/drush runserver $SIMPLETEST_BASE_URL > /dev/null 2>&1 &
+          chromedriver --port=4444 > /dev/null 2>&1 &
+          # Wait for drush server to start.
+          for i in {1..5}; do \
+            RESPONSE_CODE=$(curl -s -o /dev/null \
+              -w "%{http_code}" "$SIMPLETEST_BASE_URL" || true); \
+            if [ "$RESPONSE_CODE" -gt "301" ] || [ "$RESPONSE_CODE" -lt "200" ]; then
+              sleep 2
+            fi
+          done
+
+      # Chromium browser is required to run functional javascript tests.
+      - name: Start chromium-browser
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        run: |
+          chromium-browser --headless --disable-gpu \
+            --no-sandbox \
+            --remote-debugging-port=9222 &
+
+      - name: Debug module folder
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        continue-on-error: true
+        run: |
+          ls -sla $MODULE_FOLDER
+
+      # PHPUnit is blocking by design.
+      - name: Run tests
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        run: |
+          vendor/bin/phpunit --bootstrap $DRUPAL_ROOT/core/tests/bootstrap.php -c $MODULE_FOLDER/phpunit.xml $MODULE_FOLDER
