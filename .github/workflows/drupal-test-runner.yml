@@ -167,7 +167,7 @@ jobs:
 
           # Wait for Selenium service to become ready before PHPUnit starts.
           for i in {1..15}; do
-            if curl -sS "http://selenium:4444/wd/hub/status" > /dev/null; then
+            if curl -sS "http://selenium:4444/status" > /dev/null; then
               break
             fi
             if [ "$i" -eq 15 ]; then
@@ -187,6 +187,6 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.DRUPAL_ROOT }}
         env:
-          MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome","goog:chromeOptions":{"args":["--headless=new","--disable-gpu","--no-sandbox","--disable-dev-shm-usage"]}}, "http://selenium:4444/wd/hub"]'
+          MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome"}, "http://selenium:4444"]'
         run: |
           vendor/bin/phpunit --bootstrap $DRUPAL_ROOT/core/tests/bootstrap.php $MODULE_FOLDER/tests/src
