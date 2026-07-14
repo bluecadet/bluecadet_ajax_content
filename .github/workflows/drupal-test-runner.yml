@@ -14,6 +14,11 @@ on:
         description: MariaDB version for service container
         required: true
         type: string
+      phpunit_target:
+        description: PHPUnit target path under module root
+        required: false
+        default: 'tests/src'
+        type: string
 env:
   SIMPLETEST_DB: "mysql://drupal:drupal@mariadb:3306/drupal"
   SIMPLETEST_BASE_URL: "http://127.0.0.1:8080"
@@ -52,6 +57,16 @@ jobs:
 
       - name: Define DRUPAL_MODULE_NAME env variable
         run: echo "DRUPAL_MODULE_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+
+      # Selenium runs in a separate service container, so tests must target
+      # the job container's network IP instead of 127.0.0.1.
+      - name: Define browser-accessible base URL
+        run: |
+          JOB_CONTAINER_IP=$(hostname -i | awk '{print $1}')
+          echo "JOB_CONTAINER_IP=$JOB_CONTAINER_IP" >> $GITHUB_ENV
+          echo "SIMPLETEST_BASE_URL=http://$JOB_CONTAINER_IP:8080" >> $GITHUB_ENV
+          echo "DRUSH_RUNSERVER_URL=http://0.0.0.0:8080" >> $GITHUB_ENV
+          echo "DRUSH_PROBE_URL=http://127.0.0.1:8080" >> $GITHUB_ENV
 
       # Change the module folder according to your needs, it's probably either
       # modules/contrib/$DRUPAL_MODULE_NAME or modules/custom/$DRUPAL_MODULE_NAME.
@@ -158,10 +173,13 @@ jobs:
         working-directory: ${{ env.DRUPAL_ROOT }}
         run: |
           echo "Debug: DRUPAL_ROOT=$DRUPAL_ROOT"
+          echo "Debug: JOB_CONTAINER_IP=$JOB_CONTAINER_IP"
           echo "Debug: SIMPLETEST_BASE_URL=$SIMPLETEST_BASE_URL"
+          echo "Debug: DRUSH_RUNSERVER_URL=$DRUSH_RUNSERVER_URL"
+          echo "Debug: DRUSH_PROBE_URL=$DRUSH_PROBE_URL"
           echo "Debug: selenium endpoint=http://selenium:4444"
 
-          vendor/bin/drush runserver $SIMPLETEST_BASE_URL > /dev/null 2>&1 &
+          vendor/bin/drush runserver $DRUSH_RUNSERVER_URL > /dev/null 2>&1 &
 
           echo "Debug: DNS resolution for selenium"
           getent hosts selenium || true
@@ -169,14 +187,14 @@ jobs:
           # Wait for drush server to start.
           for i in {1..5}; do \
             RESPONSE_CODE=$(curl -s -o /dev/null \
-              -w "%{http_code}" "$SIMPLETEST_BASE_URL" || true); \
+              -w "%{http_code}" "$DRUSH_PROBE_URL" || true); \
             if [ "$RESPONSE_CODE" -gt "301" ] || [ "$RESPONSE_CODE" -lt "200" ]; then
               sleep 2
             fi
           done
 
           echo "Debug: Drush HTTP probe"
-          curl -sS -I "$SIMPLETEST_BASE_URL" || true
+          curl -sS -I "$DRUSH_PROBE_URL" || true
 
           # Wait for Selenium service to become ready before PHPUnit starts.
           for i in {1..15}; do
@@ -206,4 +224,4 @@ jobs:
         env:
           MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome","chromeOptions":{"w3c": false, "args":["--disable-gpu","--headless", "--no-sandbox"]}}, "http://selenium:4444/wd/hub"]'
         run: |
-          vendor/bin/phpunit --bootstrap $DRUPAL_ROOT/core/tests/bootstrap.php $MODULE_FOLDER/tests/src
+          vendor/bin/phpunit --bootstrap $DRUPAL_ROOT/core/tests/bootstrap.php "$MODULE_FOLDER/${{ inputs.phpunit_target }}"
