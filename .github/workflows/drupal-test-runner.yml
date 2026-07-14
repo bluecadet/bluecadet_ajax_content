@@ -187,6 +187,6 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.DRUPAL_ROOT }}
         env:
-          MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome"}, "http://selenium:4444"]'
+          MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome","goog:chromeOptions":{"args":["--headless=new","--disable-gpu","--no-sandbox","--disable-dev-shm-usage"]}}, "http://selenium:4444"]'
         run: |
           vendor/bin/phpunit --bootstrap $DRUPAL_ROOT/core/tests/bootstrap.php $MODULE_FOLDER/tests/src
