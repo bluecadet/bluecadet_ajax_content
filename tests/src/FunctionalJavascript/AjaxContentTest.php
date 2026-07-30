@@ -68,10 +68,12 @@ class AjaxContentTest extends WebDriverTestBase {
     // Bring the observed element into view so IntersectionObserver can fire.
     $this->scrollElementIntoView('#to-be-replaced-1');
 
-    $session_assert->waitForElement('css', '#to-be-replaced-1 p');
-    $session_assert->elementTextContains('css', '#to-be-replaced-1', 'Ajaxed Paragraph 1.');
-    $session_assert->elementTextContains('css', '#to-be-replaced-1', 'Ajaxed Paragraph 2.');
-    $session_assert->elementTextContains('css', '#to-be-replaced-1', 'Ajaxed Paragraph 3.');
+    // ReplaceCommand removes #to-be-replaced-1 from the DOM entirely and
+    // inserts the response markup in its place, so assert against the page.
+    $session_assert->waitForText('Ajaxed Paragraph 1.');
+    $session_assert->pageTextContains('Ajaxed Paragraph 1.');
+    $session_assert->pageTextContains('Ajaxed Paragraph 2.');
+    $session_assert->pageTextContains('Ajaxed Paragraph 3.');
   }
 
   /**
