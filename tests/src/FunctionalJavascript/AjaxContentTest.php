@@ -74,6 +74,15 @@ class AjaxContentTest extends WebDriverTestBase {
     $session_assert->pageTextContains('Ajaxed Paragraph 1.');
     $session_assert->pageTextContains('Ajaxed Paragraph 2.');
     $session_assert->pageTextContains('Ajaxed Paragraph 3.');
+
+    // Verify the example library CSS was loaded: sample-library.css sets
+    // background-color: red on .simple-example. Browsers report this as
+    // rgb(255, 0, 0) via getComputedStyle.
+    $session_assert->waitForElement('css', '.simple-example');
+    $bg_color = $this->getSession()->evaluateScript(
+      'window.getComputedStyle(document.querySelector(".simple-example")).backgroundColor'
+    );
+    $this->assertEquals('rgb(255, 0, 0)', $bg_color);
   }
 
   /**
