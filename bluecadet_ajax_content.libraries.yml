@@ -5,3 +5,4 @@ content-ajaxing:
   dependencies:
     - core/drupal
     - core/jquery
+    - core/drupal.ajax
