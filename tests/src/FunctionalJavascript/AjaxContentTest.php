@@ -4,6 +4,7 @@ namespace Drupal\Tests\bluecadet_ajax_content\FunctionalJavascript;
 
 use Drupal\Core\Url;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\FunctionalJavascriptTests\WebDriverWebAssert;
 
 /**
  * Tests Ajax content loading functionality.
@@ -29,6 +30,7 @@ class AjaxContentTest extends WebDriverTestBase {
     $url = Url::fromRoute('bluecadet_ajax_content_example.simple_example_immediate');
     $this->drupalGet($url);
 
+    /** @var \Drupal\FunctionalJavascriptTests\WebDriverWebAssert $session_assert */
     $session_assert = $this->assertSession();
 
     $session_assert->waitForElement('css', '.ajax-now--loaded');
@@ -44,6 +46,7 @@ class AjaxContentTest extends WebDriverTestBase {
     $url = Url::fromRoute('bluecadet_ajax_content_example.simple_example_scroll');
     $this->drupalGet($url);
 
+    /** @var \Drupal\FunctionalJavascriptTests\WebDriverWebAssert $session_assert */
     $session_assert = $this->assertSession();
     $session_assert->waitForElement('css', '[data-ajax-scroll]');
 
@@ -62,6 +65,7 @@ class AjaxContentTest extends WebDriverTestBase {
     $url = Url::fromRoute('bluecadet_ajax_content_example.ajax_commands_example_scroll');
     $this->drupalGet($url);
 
+    /** @var \Drupal\FunctionalJavascriptTests\WebDriverWebAssert $session_assert */
     $session_assert = $this->assertSession();
     $session_assert->waitForElement('css', '#to-be-replaced-1');
 
@@ -97,6 +101,7 @@ class AjaxContentTest extends WebDriverTestBase {
    * Asserts the expected paragraphs are present on the page.
    */
   protected function assertAjaxParagraphsPresent(): void {
+    /** @var \Drupal\FunctionalJavascriptTests\WebDriverWebAssert $session_assert */
     $session_assert = $this->assertSession();
 
     $session_assert->pageTextContains('Ajaxed Paragraph 1.');
