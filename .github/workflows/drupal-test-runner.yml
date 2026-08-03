@@ -206,12 +206,14 @@ jobs:
         working-directory: ${{ env.DRUPAL_ROOT }}
         env:
           MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome","chromeOptions":{"w3c": false, "args":["--disable-gpu","--headless", "--no-sandbox"]}}, "http://selenium:4444/wd/hub"]'
+          XDEBUG_MODE: coverage
         run: |
           mkdir -p "$GITHUB_WORKSPACE/coverage"
           if php -m | grep -qiE 'xdebug|pcov'; then
             vendor/bin/phpunit \
               --bootstrap $DRUPAL_ROOT/core/tests/bootstrap.php \
               --coverage-filter "$MODULE_FOLDER" \
+              --coverage-filter "$MODULE_FOLDER"/*.module \
               --coverage-clover "$GITHUB_WORKSPACE/coverage/clover.xml" \
               "$MODULE_FOLDER/${{ inputs.phpunit_target }}"
           else
@@ -228,3 +230,22 @@ jobs:
           name: phpunit-coverage-${{ inputs.drupal_core }}-php${{ inputs.php_version }}
           path: ${{ github.workspace }}/coverage/clover.xml
           if-no-files-found: ignore
+
+      - name: Code Coverage Summary
+        if: ${{ hashFiles(format('{0}/coverage/clover.xml', github.workspace)) != '' }}
+        uses: saschanowak/CloverCodeCoverageSummary@1.1.1
+        with:
+          filename: ${{ github.workspace }}/coverage/clover.xml
+
+      - name: Add Coverage Summary to Job Summary
+        if: ${{ hashFiles(format('{0}/coverage/clover.xml', github.workspace)) != '' }}
+        run: |
+          echo "## Coverage: D${{ inputs.drupal_core }} | PHP${{ inputs.php_version }}" >> $GITHUB_STEP_SUMMARY
+          cat code-coverage-summary.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Add Coverage Summary as PR Comment
+        if: ${{ github.event_name == 'pull_request' && hashFiles(format('{0}/coverage/clover.xml', github.workspace)) != '' }}
+        uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          header: coverage-${{ inputs.drupal_core }}-php${{ inputs.php_version }}
+          path: code-coverage-summary.md
