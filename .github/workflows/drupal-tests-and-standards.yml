@@ -33,6 +33,8 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' }}
     permissions:
       contents: read
+      issues: write
+      pull-requests: write
     name: Targeted | D${{ inputs.drupal_core }} | PHP${{ inputs.php_version }} | MariaDB${{ inputs.mariadb_version }}
     uses: ./.github/workflows/drupal-test-runner.yml
     with:
@@ -45,6 +47,8 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     permissions:
       contents: read
+      issues: write
+      pull-requests: write
     name: PR matrix | D${{ matrix.drupal_core }} | PHP${{ matrix.php_version }} | MariaDB${{ matrix.mariadb_version }}
     strategy:
       fail-fast: false
@@ -73,6 +77,8 @@ jobs:
     if: ${{ github.event_name == 'push' || github.event_name == 'schedule' }}
     permissions:
       contents: read
+      issues: write
+      pull-requests: write
     name: Full matrix | D${{ matrix.drupal_core }} | PHP${{ matrix.php_version }} | MariaDB${{ matrix.mariadb_version }}
     strategy:
       fail-fast: false

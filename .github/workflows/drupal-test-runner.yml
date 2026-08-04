@@ -27,6 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      issues: write
+      pull-requests: write
     container:
       # See https://github.com/tuutti/docker-images/tree/main/drupal/ci
       # to see how this image is built.
@@ -110,7 +112,9 @@ jobs:
       # the main Composer project.
       - name: Install Drupal-Check
         run: |
+          composer config --no-plugins allow-plugins.composer/installers true
           if [[ "${{ inputs.drupal_core }}" == 11.* ]]; then
+            composer config --no-plugins allow-plugins.symfony/runtime true
             if composer require --dev mglaman/drupal-check:^1.5 -W --no-interaction --no-progress; then
               echo "DRUPAL_CHECK_BIN=vendor/bin/drupal-check" >> "$GITHUB_ENV"
             else
