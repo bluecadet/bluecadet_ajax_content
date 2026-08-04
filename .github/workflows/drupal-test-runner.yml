@@ -145,14 +145,15 @@ jobs:
             site-install minimal --db-url="$SIMPLETEST_DB"
           vendor/bin/drush en $DRUPAL_MODULE_NAME -y
 
-      - name: Set PHPCS config vars
-        working-directory: ${{ env.DRUPAL_ROOT }}
-        continue-on-error: true
-        run: |
-          ./vendor/bin/phpcs --config-set ignore_warnings_on_exit 1
-          ./vendor/bin/phpcs --config-set ignore_errors_on_exit 1
+      # - name: Set PHPCS config vars
+      #   working-directory: ${{ env.DRUPAL_ROOT }}
+      #   continue-on-error: true
+      #   run: |
+      #     ./vendor/bin/phpcs --config-set ignore_warnings_on_exit 1
+      #     ./vendor/bin/phpcs --config-set ignore_errors_on_exit 1
 
       - name: Run PHPCS
+        id: phpcs
         working-directory: ${{ env.DRUPAL_ROOT }}
         continue-on-error: true
         run: |
@@ -160,6 +161,7 @@ jobs:
           vendor/bin/phpcs --report=Bluecadet\\PHPCS\\Report\\MarkdownGithub -s --standard=DrupalPractice --extensions=php,module,inc,install,test,profile,theme,css,info,txt --ignore=node_modules,bower_components,vendor,dist --exclude=Drupal.InfoFiles.AutoAddedKeys --colors $MODULE_FOLDER >> $GITHUB_STEP_SUMMARY
 
       - name: Run Drupal-Check
+        id: drupal_check
         working-directory: ${{ env.DRUPAL_ROOT }}
         continue-on-error: true
         run: |
@@ -203,7 +205,9 @@ jobs:
 
       # PHPUnit is blocking by design.
       - name: Run tests
+        id: phpunit
         working-directory: ${{ env.DRUPAL_ROOT }}
+        continue-on-error: true
         env:
           MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome","chromeOptions":{"w3c": false, "args":["--disable-gpu","--headless", "--no-sandbox"]}}, "http://selenium:4444/wd/hub"]'
           XDEBUG_MODE: coverage
@@ -249,3 +253,15 @@ jobs:
         with:
           header: coverage-${{ inputs.drupal_core }}-php${{ inputs.php_version }}
           path: code-coverage-summary.md
+
+      - name: Add check results to job summary
+        if: ${{ always() }}
+        run: |
+          echo "## Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "- PHPCS: ${{ steps.phpcs.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Drupal-Check: ${{ steps.drupal_check.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "- PHPUnit: ${{ steps.phpunit.outcome }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail job if any checks found issues
+        if: ${{ always() && (steps.phpcs.outcome == 'failure' || steps.drupal_check.outcome == 'failure' || steps.phpunit.outcome == 'failure') }}
+        run: exit 1
