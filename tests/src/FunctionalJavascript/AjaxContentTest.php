@@ -4,7 +4,6 @@ namespace Drupal\Tests\bluecadet_ajax_content\FunctionalJavascript;
 
 use Drupal\Core\Url;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
-use Drupal\FunctionalJavascriptTests\WebDriverWebAssert;
 
 /**
  * Tests Ajax content loading functionality.
