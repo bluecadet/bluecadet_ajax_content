@@ -10,7 +10,7 @@ dependencies:
 
 configure: null
 
-# Information added by packaging script on 2026-06-11
-version: 1.2.0
+# Information added by packaging script on 2026-08-05
+version: 1.1.0-rc.1
 project: bluecadet_ajax_content
-datestamp: 1781192239902
+datestamp: 1785942189701
