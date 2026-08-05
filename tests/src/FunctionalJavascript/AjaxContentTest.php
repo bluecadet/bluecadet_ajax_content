@@ -1,11 +1,15 @@
 <?php
 
-namespace Drupal\bluecadet_ajax_content\FunctionalJavascript;
+namespace Drupal\Tests\bluecadet_ajax_content\FunctionalJavascript;
 
 use Drupal\Core\Url;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
-use Drupal\system\Entity\Action;
 
+/**
+ * Tests Ajax content loading functionality.
+ *
+ * @group bluecadet_ajax_content
+ */
 class AjaxContentTest extends WebDriverTestBase {
 
   /**
@@ -19,72 +23,89 @@ class AjaxContentTest extends WebDriverTestBase {
   protected $defaultTheme = 'stark';
 
   /**
-   * {@inheritdoc}
+   * Tests immediate Ajax content loading.
    */
-  protected function setUp(): void {
-    parent::setUp();
-    // $user = $this->drupalCreateUser(['administer actions']);
-    // $this->drupalLogin($user);
-  }
-
-  /**
-   * Tests action plugins with AJAX save their configuration.
-   */
-  public function testAjaxContentLoad() {
-    // Simple example.
+  public function testAjaxContentLoadImmediate(): void {
     $url = Url::fromRoute('bluecadet_ajax_content_example.simple_example_immediate');
     $this->drupalGet($url);
 
+    /** @var \Drupal\FunctionalJavascriptTests\WebDriverWebAssert $session_assert */
     $session_assert = $this->assertSession();
 
-    $session_assert->assertWaitOnAjaxRequest();
-    $page = $this->getSession()->getPage();
+    $session_assert->waitForElement('css', '.ajax-now--loaded');
+    $session_assert->waitForElement('css', '.ajax-now--loaded p');
 
+    $this->assertAjaxParagraphsPresent();
+  }
+
+  /**
+   * Tests scroll-triggered Ajax content loading.
+   */
+  public function testAjaxContentLoadOnScroll(): void {
+    $url = Url::fromRoute('bluecadet_ajax_content_example.simple_example_scroll');
+    $this->drupalGet($url);
+
+    /** @var \Drupal\FunctionalJavascriptTests\WebDriverWebAssert $session_assert */
+    $session_assert = $this->assertSession();
+    $session_assert->waitForElement('css', '[data-ajax-scroll]');
+
+    // Bring the observed element into view so IntersectionObserver can fire.
+    $this->scrollElementIntoView('[data-ajax-scroll]');
+
+    $session_assert->waitForElement('css', '[data-ajax-scroll].loaded p');
+
+    $this->assertAjaxParagraphsPresent();
+  }
+
+  /**
+   * Tests Ajax commands content replacement.
+   */
+  public function testAjaxCommandsLoad(): void {
+    $url = Url::fromRoute('bluecadet_ajax_content_example.ajax_commands_example_scroll');
+    $this->drupalGet($url);
+
+    /** @var \Drupal\FunctionalJavascriptTests\WebDriverWebAssert $session_assert */
+    $session_assert = $this->assertSession();
+    $session_assert->waitForElement('css', '#to-be-replaced-1');
+
+    // Bring the observed element into view so IntersectionObserver can fire.
+    $this->scrollElementIntoView('#to-be-replaced-1');
+
+    // ReplaceCommand removes #to-be-replaced-1 from the DOM entirely and
+    // inserts the response markup in its place, so assert against the page.
+    $session_assert->waitForText('Ajaxed Paragraph 1.');
     $session_assert->pageTextContains('Ajaxed Paragraph 1.');
     $session_assert->pageTextContains('Ajaxed Paragraph 2.');
     $session_assert->pageTextContains('Ajaxed Paragraph 3.');
 
-
-    // Scroll example.
-    // $url = Url::fromRoute('bluecadet_ajax_content_example.simple_example_scroll');
-    // $this->drupalGet($url);
-    // // $this->assertSession()->assertWaitOnAjaxRequest();
-    // $page = $this->getSession()->getPage();
-
-    // $this->assertSession()->waitForElementVisible('css', 'div[data-ajax-scroll=*]');
-
-    // $this->assertSession()->pageTextContains('Ajaxed Paragraph 1.');
-    // $this->assertSession()->pageTextContains('Ajaxed Paragraph 2.');
-    // $this->assertSession()->pageTextContains('Ajaxed Paragraph 3.');
-
-
-    // $id = 'test_plugin';
-    // $this->assertSession()->waitForElementVisible('named', ['button', 'Edit'])->press();
-    // $this->assertSession()->waitForElementVisible('css', '[name="id"]')->setValue($id);
-
-    // $page->find('css', '[name="having_a_party"]')
-    //   ->check();
-    // $this->assertSession()->waitForElementVisible('css', '[name="party_time"]');
-
-    // $party_time = 'Evening';
-    // $page->find('css', '[name="party_time"]')
-    //   ->setValue($party_time);
-
-    // $page->find('css', '[value="Save"]')
-    //   ->click();
-
-    // $url = Url::fromRoute('entity.action.collection');
-    // $this->assertSession()->pageTextContains('The action has been successfully saved.');
-    // $this->assertSession()->addressEquals($url);
-
-    // // Check storage.
-    // $instance = Action::load($id);
-    // $configuration = $instance->getPlugin()->getConfiguration();
-    // $this->assertEquals(['party_time' => $party_time], $configuration);
-
-    // // Configuration should be shown in edit form.
-    // $this->drupalGet($instance->toUrl('edit-form'));
-    // $this->assertSession()->checkboxChecked('having_a_party');
-    // $this->assertSession()->fieldValueEquals('party_time', $party_time);
+    // Verify the example library CSS was loaded: sample-library.css sets
+    // background-color: red on .simple-example. Browsers report this as
+    // rgb(255, 0, 0) via getComputedStyle.
+    $session_assert->waitForElement('css', '.simple-example');
+    $bg_color = $this->getSession()->evaluateScript(
+      'window.getComputedStyle(document.querySelector(".simple-example")).backgroundColor'
+    );
+    $this->assertEquals('rgb(255, 0, 0)', $bg_color);
   }
+
+  /**
+   * Scrolls a CSS selector into the viewport to trigger observer-based loading.
+   */
+  protected function scrollElementIntoView(string $selector): void {
+    $selector = addslashes($selector);
+    $this->getSession()->executeScript("const el = document.querySelector(\"$selector\"); if (el) { el.scrollIntoView({block: 'center'}); }");
+  }
+
+  /**
+   * Asserts the expected paragraphs are present on the page.
+   */
+  protected function assertAjaxParagraphsPresent(): void {
+    /** @var \Drupal\FunctionalJavascriptTests\WebDriverWebAssert $session_assert */
+    $session_assert = $this->assertSession();
+
+    $session_assert->pageTextContains('Ajaxed Paragraph 1.');
+    $session_assert->pageTextContains('Ajaxed Paragraph 2.');
+    $session_assert->pageTextContains('Ajaxed Paragraph 3.');
+  }
+
 }

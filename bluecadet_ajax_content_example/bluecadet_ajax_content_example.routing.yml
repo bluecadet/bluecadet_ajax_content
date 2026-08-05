@@ -5,7 +5,7 @@ bluecadet_ajax_content_example.simple_example_immediate:
     _controller: '\Drupal\bluecadet_ajax_content_example\Controller\SimpleExample::build'
     _title: 'Custom Ajax Content Examples'
   requirements:
-    _permission: true
+    _access: 'TRUE'
 
 bluecadet_ajax_content_example.simple_example_immediate.response:
   path: '/ajax-api/simple-example'
@@ -13,7 +13,7 @@ bluecadet_ajax_content_example.simple_example_immediate.response:
     _controller: '\Drupal\bluecadet_ajax_content_example\Controller\SimpleExample::ajaxResponse'
     _title: 'Custom Ajax Content Examples'
   requirements:
-    _permission: true
+    _access: 'TRUE'
 
 # Scroll.
 bluecadet_ajax_content_example.simple_example_scroll:
@@ -22,7 +22,7 @@ bluecadet_ajax_content_example.simple_example_scroll:
     _controller: '\Drupal\bluecadet_ajax_content_example\Controller\ScrollExample::build'
     _title: 'Custom Ajax Content Examples'
   requirements:
-    _permission: true
+    _access: 'TRUE'
 
 bluecadet_ajax_content_example.simple_example_scroll.response:
   path: '/ajax-api/scroll-example'
@@ -30,7 +30,7 @@ bluecadet_ajax_content_example.simple_example_scroll.response:
     _controller: '\Drupal\bluecadet_ajax_content_example\Controller\ScrollExample::ajaxResponse'
     _title: 'Custom Ajax Content Examples'
   requirements:
-    _permission: true
+    _access: 'TRUE'
 
 # Ajax Commands.
 bluecadet_ajax_content_example.ajax_commands_example_scroll:
@@ -39,7 +39,7 @@ bluecadet_ajax_content_example.ajax_commands_example_scroll:
     _controller: '\Drupal\bluecadet_ajax_content_example\Controller\AjaxCommandsExample::build'
     _title: 'Custom Ajax Content Examples'
   requirements:
-    _permission: true
+    _access: 'TRUE'
 
 bluecadet_ajax_content_example.ajax_commands_example_scroll.response:
   path: '/ajax-api/ajax-commands-example'
@@ -47,4 +47,4 @@ bluecadet_ajax_content_example.ajax_commands_example_scroll.response:
     _controller: '\Drupal\bluecadet_ajax_content_example\Controller\AjaxCommandsExample::ajaxResponse'
     _title: 'Custom Ajax Content Examples'
   requirements:
-    _permission: true
+    _access: 'TRUE'
