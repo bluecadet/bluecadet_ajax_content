@@ -15,3 +15,5 @@ package-lock.json       export-ignore
 package.json            export-ignore
 phpunit.xml             export-ignore
 postcss.config.js       export-ignore
+bldr.config.js          export-ignore
+phpstan.neon.dist       export-ignore
