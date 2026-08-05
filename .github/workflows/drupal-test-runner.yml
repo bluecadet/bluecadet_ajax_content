@@ -27,7 +27,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      issues: write
       pull-requests: write
     container:
       # See https://github.com/tuutti/docker-images/tree/main/drupal/ci
@@ -98,37 +97,14 @@ jobs:
           composer config extra.installer-paths
           composer config --json extra.installer-types '["custom-drupal-module"]'
           composer config --json --merge extra.installer-paths '{"modules/bluecadet/{$name}": ["type:custom-drupal-module"]}'
-          case "${{ inputs.drupal_core }}" in
-            11.*)
-              echo "Skipping composer install of drupal-check for Drupal 11 due to PHPStan major-version conflicts."
-              ;;
-            *)
-              composer require --dev mglaman/drupal-check:^1.5 -W
-              ;;
-          esac
           composer require bluecadet/$DRUPAL_MODULE_NAME -W
 
-      # Drupal 11 may need a fallback if drupal-check cannot be installed into
-      # the main Composer project.
-      - name: Install Drupal-Check
-        run: |
-          composer config --no-plugins allow-plugins.composer/installers true
-          if [[ "${{ inputs.drupal_core }}" == 11.* ]]; then
-            composer config --no-plugins allow-plugins.symfony/runtime true
-            if composer require --dev mglaman/drupal-check:^1.5 -W --no-interaction --no-progress; then
-              echo "DRUPAL_CHECK_BIN=vendor/bin/drupal-check" >> "$GITHUB_ENV"
-            else
-              echo "Falling back to isolated Drupal-Check toolchain for Drupal 11."
-              mkdir -p "$HOME/drupal-check-tools"
-              cd "$HOME/drupal-check-tools"
-              composer init --name bluecadet/drupal-check-tools --require mglaman/drupal-check:^1.5 --no-interaction
-              composer install --no-interaction --no-progress
-              echo "DRUPAL_CHECK_BIN=$HOME/drupal-check-tools/vendor/bin/drupal-check" >> "$GITHUB_ENV"
-            fi
-          else
-            composer require --dev mglaman/drupal-check:^1.5 -W --no-interaction --no-progress
-            echo "DRUPAL_CHECK_BIN=vendor/bin/drupal-check" >> "$GITHUB_ENV"
-          fi
+      # mglaman/phpstan-drupal and phpstan/phpstan-deprecation-rules are each
+      # released for both PHPStan 1.x and 2.x, so composer resolves the right
+      # major version per Drupal core branch without any manual branching.
+      - name: Install PHPStan (Drupal)
+        working-directory: ${{ env.DRUPAL_ROOT }}
+        run: composer require --dev mglaman/phpstan-drupal phpstan/phpstan-deprecation-rules -W --no-interaction --no-progress
 
       # PHP 8+ requires newer phpunit, use core's composer script to upgrade it.
       - name: Upgrade phpunit
@@ -174,12 +150,12 @@ jobs:
           vendor/bin/phpcs --report=Bluecadet\\PHPCS\\Report\\MarkdownGithub -s --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,css,info,txt --ignore=node_modules,bower_components,vendor,dist --exclude=Drupal.InfoFiles.AutoAddedKeys --colors $MODULE_FOLDER >> $GITHUB_STEP_SUMMARY
           vendor/bin/phpcs --report=Bluecadet\\PHPCS\\Report\\MarkdownGithub -s --standard=DrupalPractice --extensions=php,module,inc,install,test,profile,theme,css,info,txt --ignore=node_modules,bower_components,vendor,dist --exclude=Drupal.InfoFiles.AutoAddedKeys --colors $MODULE_FOLDER >> $GITHUB_STEP_SUMMARY
 
-      - name: Run Drupal-Check
-        id: drupal_check
+      - name: Run PHPStan (Drupal deprecation checks)
+        id: phpstan
         working-directory: ${{ env.DRUPAL_ROOT }}
         continue-on-error: true
         run: |
-          php "$DRUPAL_CHECK_BIN" $MODULE_FOLDER --drupal-root ${{ env.DRUPAL_ROOT }}
+          vendor/bin/phpstan analyse --configuration "$MODULE_FOLDER/phpstan.neon.dist" --no-progress "$MODULE_FOLDER"
 
       - name: Start Drush webserver and wait for Selenium
         working-directory: ${{ env.DRUPAL_ROOT }}
@@ -269,9 +245,9 @@ jobs:
         run: |
           echo "## Check Results" >> $GITHUB_STEP_SUMMARY
           echo "- PHPCS: ${{ steps.phpcs.outcome }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Drupal-Check: ${{ steps.drupal_check.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "- PHPStan: ${{ steps.phpstan.outcome }}" >> $GITHUB_STEP_SUMMARY
           echo "- PHPUnit: ${{ steps.phpunit.outcome }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Fail job if any checks found issues
-        if: ${{ always() && (steps.phpcs.outcome == 'failure' || steps.drupal_check.outcome == 'failure' || steps.phpunit.outcome == 'failure') }}
+        if: ${{ always() && (steps.phpcs.outcome == 'failure' || steps.phpstan.outcome == 'failure' || steps.phpunit.outcome == 'failure') }}
         run: exit 1

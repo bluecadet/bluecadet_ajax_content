@@ -26,14 +26,17 @@ on:
     # GitHub Actions cron uses UTC. 06:00 UTC is 1:00 AM ET (EST) / 2:00 AM ET (EDT).
     - cron: '0 6 1 * *'
   push:
+    branches: [ 1.x ]
   pull_request:
     branches: [ 1.x ]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test-target:
     if: ${{ github.event_name == 'workflow_dispatch' }}
     permissions:
       contents: read
-      issues: write
       pull-requests: write
     name: Targeted | D${{ inputs.drupal_core }} | PHP${{ inputs.php_version }} | MariaDB${{ inputs.mariadb_version }}
     uses: ./.github/workflows/drupal-test-runner.yml
@@ -47,7 +50,6 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     permissions:
       contents: read
-      issues: write
       pull-requests: write
     name: PR matrix | D${{ matrix.drupal_core }} | PHP${{ matrix.php_version }} | MariaDB${{ matrix.mariadb_version }}
     strategy:
@@ -77,7 +79,6 @@ jobs:
     if: ${{ github.event_name == 'push' || github.event_name == 'schedule' }}
     permissions:
       contents: read
-      issues: write
       pull-requests: write
     name: Full matrix | D${{ matrix.drupal_core }} | PHP${{ matrix.php_version }} | MariaDB${{ matrix.mariadb_version }}
     strategy:
