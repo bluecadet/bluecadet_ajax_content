@@ -17,3 +17,8 @@ phpunit.xml             export-ignore
 postcss.config.js       export-ignore
 bldr.config.js          export-ignore
 phpstan.neon.dist       export-ignore
+
+# this composer.json stub exists only so the CI coverage-summary action
+# breaks out this submodule as its own package row; it isn't a
+# standalone-installable Composer package, so exclude it from the tarball
+modules/bluecadet_ajax_content_example/composer.json  export-ignore
