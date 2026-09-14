@@ -41,11 +41,12 @@ vendor/bin/phpcs --standard=DrupalPractice --extensions=php,module,inc,install,t
   modules/bluecadet/bluecadet_ajax_content
 ```
 
-### Deprecation Checking
+### Static Analysis
 
 ```bash
 # From Drupal root
-vendor/bin/drupal-check modules/bluecadet/bluecadet_ajax_content
+vendor/bin/phpstan analyse --configuration modules/bluecadet/bluecadet_ajax_content/phpstan.neon.dist \
+  modules/bluecadet/bluecadet_ajax_content
 ```
 
 ## Version Compatibility
@@ -57,7 +58,6 @@ vendor/bin/drupal-check modules/bluecadet/bluecadet_ajax_content
 
 ## CI/CD
 
-GitHub Actions runs tests on:
-- Drupal 10.5.x, 10.6.x (PHP 8.2, 8.3)
-- Drupal 11.2.x, 11.3.x (PHP 8.3)
-- MariaDB 10.6, 11.4
+GitHub Actions delegates to the shared, config-driven orchestrator in
+[bluecadet/web-gh-actions](https://github.com/bluecadet/web-gh-actions) --
+see `.github/drupal-ci.yml` for the exact Drupal core / PHP / MariaDB matrix.
