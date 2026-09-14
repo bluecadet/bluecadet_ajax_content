@@ -94,6 +94,10 @@ For comprehensive validation, manually test the following:
 - Updated PHPUnit configuration for PHPUnit 10+
 - Updated GitHub Actions workflow for modern Drupal versions
 - Fixed test namespace and annotations
+- Moved CI to a shared, config-driven orchestrator in `bluecadet/web-gh-actions`
+- Moved `bluecadet_ajax_content_example` under `modules/`, matching the standard submodule layout the shared CI's test/coverage discovery expects
+- Fixed several postcss plugins that were silently relying on an old transitive dependency rather than being declared directly; updated `@bluecadet/drops` to `^1.2.1`
+- Added Kernel test coverage for the example submodule's controllers (0% to 97%)
 
 ### 1.0.x
 
