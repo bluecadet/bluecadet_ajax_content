@@ -18,7 +18,7 @@ A Drupal module that provides a library for handling AJAX content loading utiliz
 
 ### Submodules
 
-- bluecadet_ajax_content_example
+- bluecadet_ajax_content_example: Example controllers demonstrating the three AJAX content loading patterns
 
 ## Not using Composer
 
@@ -48,11 +48,7 @@ line as well as the location for the module.
 
 ## Testing
 
-This module includes automated tests that run via GitHub Actions against:
-
-- Drupal 10.5.x and 10.6.x (PHP 8.2 and 8.3)
-- Drupal 11.2.x and 11.3.x (PHP 8.3)
-- MariaDB 10.6 and 11.4
+This module includes automated tests that run via GitHub Actions against Drupal 10.5.x-10.6.x and 11.2.x-11.3.x (PHP 8.2-8.4, MariaDB 10.4/10.6) -- see `.github/drupal-ci.yml` for the exact matrix.
 
 ### Test Plan
 
@@ -62,8 +58,12 @@ The CI pipeline runs the following for each Drupal version:
 
 1. **PHPCS** - Drupal coding standards validation
 2. **DrupalPractice** - Best practices validation
-3. **Drupal-Check** - Deprecation and compatibility checking
+3. **PHPStan** - Drupal-aware static analysis
 4. **PHPUnit Functional JavaScript Tests** - Tests AJAX content loading
+
+#### Current coverage
+
+No dedicated unit/kernel tests exist yet -- the only automated test is a Functional JavaScript test exercising the three AJAX loading patterns end to end. Both the parent module's `.module` file and `bluecadet_ajax_content_example`'s controller classes are measured by the coverage report, but neither has real line coverage from that single functional test.
 
 #### Manual Testing Checklist
 
@@ -99,3 +99,13 @@ For comprehensive validation, manually test the following:
 
 - Initial commit allowing for 3 different types of Content AJAXing
 - Adding in another "trigger" type for Content AJAXing
+
+<br>
+<br>
+<br>
+
+## Proudly developed @ Bluecadet
+
+<p style="background-color: white; padding: 20px">
+  <a href="https://www.bluecadet.com/"><img style="max-width: 50%; min-width: 300px; background: white; padding: 20px;" src="https://www.bluecadet.com/wp-content/themes/bluecadet-2018/images/logo/logo-bluecadet-black.svg" alt="Bluecadet"></a>
+</p>
