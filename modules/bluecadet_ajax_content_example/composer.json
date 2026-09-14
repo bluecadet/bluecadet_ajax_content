@@ -1,0 +1,6 @@
+{
+  "name": "bluecadet/bluecadet_ajax_content_example",
+  "description": "Example for custom Ajaxing of content.",
+  "type": "custom-drupal-module",
+  "license": "GPL-2.0+"
+}

@@ -1,7 +1,7 @@
 
 let drupal_modules = [
   "./",
-  "./bluecadet_ajax_content_example/",
+  "./modules/bluecadet_ajax_content_example/",
 ];
 
 let css_config = [];
